@@ -1,6 +1,6 @@
 # ec2-sg-mangler
 
-*Helper utility to add the EC2 instance public IPs to an AWS Security Group*
+*Helper utility to manage the EC2 instance public IPs in an AWS Security Group*
 
 # Summary
 
