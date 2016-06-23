@@ -22,3 +22,7 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# to cover go build iterations
+ec2-sg-mangler
+cpuid-ec2-sg-mangler
