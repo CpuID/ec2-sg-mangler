@@ -8,6 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"log"
+	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -88,9 +90,28 @@ func getThisInstancePublicIp(ec2metadata_client *ec2metadata.EC2Metadata) (strin
 // and they may be uppercase or lowercase.
 // Sanitise to lowercase and numeric.
 // List: http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
-func sanitiseIpProtocol(input string) string {
-	// TODO: implement
-	return ""
+func sanitiseIpProtocol(input string) (string, error) {
+	switch input {
+	case "tcp":
+		return "6", nil
+	case "TCP":
+		return "6", nil
+	case "udp":
+		return "17", nil
+	case "UDP":
+		return "17", nil
+	case "icmp":
+		return "1", nil
+	case "ICMP":
+		return "1", nil
+	default:
+		re := regexp.MustCompile("^([0-9])+$")
+		if re.MatchString(input) == true {
+			return input, nil
+		} else {
+			return "", errors.New("Invalid Protocol specified, this function only supports 'tcp', 'udp', 'icmp' (case insensitive) or numeric protocols.")
+		}
+	}
 }
 
 // Returns the IPs that have ingress rules that match the from/to port and protocol
@@ -114,20 +135,31 @@ func getCurrentMatchingSgIps(ec2_client *ec2.EC2, sg_id string, from int, to int
 	var result_ips []string
 	// We only care about ingress for current use cases.
 	for _, v1 := range resp.SecurityGroups[0].IpPermissions {
-		if int(*v1.FromPort) == from && int(*v1.ToPort) == to && sanitiseIpProtocol(*v1.IpProtocol) == sanitiseIpProtocol(protocol) && len(v1.IpRanges) > 0 {
+		if len(v1.IpRanges) > 0 {
+			// Slightly inefficient order of loop and conditionals, but easier to output exclusions in log.
 			for _, v2 := range v1.IpRanges {
-				// As we expect only /32s here, error on anything else.
-				split_ip_range := strings.Split(*v2.CidrIp, "/")
-				if len(split_ip_range) != 2 {
-					return []string{}, errors.New(fmt.Sprintf("Invalid CIDR Range (%s) returned from DescribeSecurityGroups API", v2.CidrIp))
+				sanitise_v1_ip_protocol, err := sanitiseIpProtocol(*v1.IpProtocol)
+				if err != nil {
+					return []string{}, err
 				}
-				if split_ip_range[1] != "32" {
-					log.Printf("Excluding %s from matched IP list, not a /32\n", v2.CidrIp)
+				sanitise_protocol, err := sanitiseIpProtocol(protocol)
+				if err != nil {
+					return []string{}, err
 				}
-				result_ips = append(result_ips, split_ip_range[0])
+				if int(*v1.FromPort) == from && int(*v1.ToPort) == to && sanitise_v1_ip_protocol == sanitise_protocol {
+					// As we expect only /32s here, error on anything else.
+					split_ip_range := strings.Split(*v2.CidrIp, "/")
+					if len(split_ip_range) != 2 {
+						return []string{}, errors.New(fmt.Sprintf("Invalid CIDR Range (%s) returned from DescribeSecurityGroups API", v2.CidrIp))
+					}
+					if split_ip_range[1] != "32" {
+						log.Printf("Excluding %s from matched IP list, not a /32\n", v2.CidrIp)
+					}
+					result_ips = append(result_ips, split_ip_range[0])
+				} else {
+					log.Printf("Excluding %s from matched IP list, unexpected from/to/protocol (unrelated rules).\n", v2.CidrIp)
+				}
 			}
-		} else {
-			// TODO: exclude log message
 		}
 	}
 	return result_ips, nil
@@ -141,7 +173,18 @@ type SgActions struct {
 // Reconcile the IP list between the SG, and what is proposed to be in use.
 func reconcileIps(sg_ips []string, proposed_ips []string) SgActions {
 	var result SgActions
-	// TODO: implement
+	for _, v1 := range sg_ips {
+		if stringInSlice(v1, proposed_ips) == true {
+
+		}
+	}
+	for _, v2 := range proposed_ips {
+		if stringInSlice(v2, sg_ips) == true {
+
+		}
+	}
+	sort.Strings(result.Add)
+	sort.Strings(result.Remove)
 	return result
 }
 
