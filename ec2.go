@@ -12,7 +12,7 @@ import (
 )
 
 // Retrieves the list of Public IPs of all EC2 instances attached to the nominated ASG.
-func getAsgPublicIps(asg_client *autoscaling.AutoScaling, ec2_client *ec2.EC2, asg_name string) ([]string, error) {
+func getAsgInstancePublicIps(asg_client *autoscaling.AutoScaling, ec2_client *ec2.EC2, asg_name string) ([]string, error) {
 	// TODO: handle pagination using NextToken
 	asg_params := &autoscaling.DescribeAutoScalingGroupsInput{
 		AutoScalingGroupNames: []*string{
@@ -111,8 +111,8 @@ func getCurrentMatchingSgIps(ec2_client *ec2.EC2, sg_id string, from int, to int
 		return []string{}, errors.New(fmt.Sprintf("Cannot find the Security Group ID '%s' - does it exist?", sg_id))
 	}
 
-	// We only care about ingress for current use cases.
 	var result_ips []string
+	// We only care about ingress for current use cases.
 	for _, v1 := range resp.SecurityGroups[0].IpPermissions {
 		if int(*v1.FromPort) == from && int(*v1.ToPort) == to && sanitiseIpProtocol(*v1.IpProtocol) == sanitiseIpProtocol(protocol) && len(v1.IpRanges) > 0 {
 			for _, v2 := range v1.IpRanges {
@@ -126,6 +126,8 @@ func getCurrentMatchingSgIps(ec2_client *ec2.EC2, sg_id string, from int, to int
 				}
 				result_ips = append(result_ips, split_ip_range[0])
 			}
+		} else {
+			// TODO: exclude log message
 		}
 	}
 	return result_ips, nil
@@ -141,4 +143,56 @@ func reconcileIps(sg_ips []string, proposed_ips []string) SgActions {
 	var result SgActions
 	// TODO: implement
 	return result
+}
+
+func doAddSgIps(ec2_client *ec2.EC2, sg_id string, from int, to int, protocol string, sg_ip_adds []string) error {
+	params := &ec2.AuthorizeSecurityGroupIngressInput{
+		GroupId: aws.String(sg_id),
+		IpPermissions: []*ec2.IpPermission{
+			{
+				FromPort:   aws.Int64(int64(from)),
+				IpProtocol: aws.String(protocol),
+				IpRanges: []*ec2.IpRange{
+					// TODO: build slice of these from sg_ip_adds
+					{
+						CidrIp: aws.String("String"),
+					},
+				},
+				ToPort: aws.Int64(int64(to)),
+			},
+		},
+	}
+
+	_, err := ec2_client.AuthorizeSecurityGroupIngress(params)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func doRemoveSgIps(ec2_client *ec2.EC2, sg_id string, from int, to int, protocol string, sg_ip_adds []string) error {
+	params := &ec2.RevokeSecurityGroupIngressInput{
+		GroupId: aws.String(sg_id),
+		IpPermissions: []*ec2.IpPermission{
+			{
+				FromPort:   aws.Int64(int64(from)),
+				IpProtocol: aws.String(protocol),
+				IpRanges: []*ec2.IpRange{
+					// TODO: build slice of these from sg_ip_adds
+					{
+						CidrIp: aws.String("String"),
+					},
+				},
+				ToPort: aws.Int64(int64(to)),
+			},
+		},
+	}
+
+	_, err := ec2_client.RevokeSecurityGroupIngress(params)
+
+	if err != nil {
+		return err
+	}
+	return nil
 }

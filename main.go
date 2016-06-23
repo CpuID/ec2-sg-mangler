@@ -75,7 +75,45 @@ func main() {
 		ec2_client := ec2.New(session.New())
 		ec2metadata_client := ec2metadata.New(session.New())
 
-		// TODO: some stuff
+		var proposed_ips []string
+		var err error
+		if len(arg_config.AutoScalingGroupName) > 0 {
+			proposed_ips, err = getAsgInstancePublicIps(asg_client, ec2_client, arg_config.AutoScalingGroupName)
+			if err != nil {
+				// TODO: handle error
+			}
+		}
+		var this_instance_ip string
+		if arg_config.ThisEc2Instance == true {
+			this_instance_ip, err = getThisInstancePublicIp(ec2metadata_client)
+			if err != nil {
+				// TODO: handle error
+			}
+			proposed_ips = append(proposed_ips, this_instance_ip)
+		}
+		// TODO: deduplicate IP list, incase this_instance_ip is in proposed_ips
+
+		sg_ips, err := getCurrentMatchingSgIps(ec2_client, arg_config.SecurityGroupId, arg_config.From, arg_config.To, arg_config.Protocol)
+		if err != nil {
+			// TODO: handle error
+		}
+
+		sg_actions := reconcileIps(sg_ips, proposed_ips)
+		if len(sg_actions.Add) > 0 {
+			err = doAddSgIps(ec2_client, arg_config.SecurityGroupId, arg_config.From, arg_config.To, arg_config.Protocol, sg_actions.Add)
+			if err != nil {
+				// TODO: handle error
+			}
+			// TODO: log output additions
+		}
+		if len(sg_actions.Remove) > 0 {
+			err = doRemoveSgIps(ec2_client, arg_config.SecurityGroupId, arg_config.From, arg_config.To, arg_config.Protocol, sg_actions.Remove)
+			if err != nil {
+				// TODO: handle error
+			}
+			// TODO: log output removals
+		}
+		log.Printf("All done.")
 	}
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
