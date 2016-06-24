@@ -118,6 +118,8 @@ GLOBAL OPTIONS:
    --version, -v  print the version
 ```
 
+AWS Credentials should be fed in using an IAM Instance Profile/Role, or the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+
 # Use within Alpine Linux Docker image
 
 If you are using a lightweight Docker image such as [Alpine Linux](https://hub.docker.com/_/alpine/) as your base,
