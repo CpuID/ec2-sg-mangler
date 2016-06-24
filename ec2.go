@@ -165,14 +165,14 @@ func getCurrentMatchingSgIps(ec2_client *ec2.EC2, sg_id string, from int, to int
 					// As we expect only /32s here, error on anything else.
 					split_ip_range := strings.Split(*v2.CidrIp, "/")
 					if len(split_ip_range) != 2 {
-						return []string{}, errors.New(fmt.Sprintf("Invalid CIDR Range (%s) returned from DescribeSecurityGroups API", v2.CidrIp))
+						return []string{}, errors.New(fmt.Sprintf("Invalid CIDR Range (%s) returned from DescribeSecurityGroups API", *v2.CidrIp))
 					}
 					if split_ip_range[1] != "32" {
-						log.Printf("Excluding %s from matched IP list, not a /32\n", v2.CidrIp)
+						log.Printf("Excluding %s from matched IP list, not a /32\n", *v2.CidrIp)
 					}
 					result_ips = append(result_ips, split_ip_range[0])
 				} else {
-					log.Printf("Excluding %s from matched IP list, unexpected from/to/protocol (unrelated rules).\n", v2.CidrIp)
+					log.Printf("Excluding %s from matched IP list, unexpected from/to/protocol (unrelated rules).\n", *v2.CidrIp)
 				}
 			}
 		}
