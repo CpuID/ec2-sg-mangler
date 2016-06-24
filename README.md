@@ -14,9 +14,16 @@ Instead, this utility can manage the Source IP Addresses for an AWS Security Gro
 respectively. The EC2 instances in question may be a single instance (such as the current instance, determined via the EC2
 metadata service), or all EC2 instance public IP addresses for a given Auto Scaling Group.
 
+It is designed to be idempotent, if the IP list matches the Security Group, no changes will be made.
+
 Note this utility assumes [ClassicLink](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/vpc-classiclink.html) is not an
 option for whatever reason (eg. you are using 10.x/8 subnets within your VPCs), in such a scenario this utility would
 not be required theoretically.
+
+# Use Cases
+
+The initial design of this utility was to run within Docker containers, just prior to starting the required application
+that needed access to a remote resource in EC2-Classic. The Docker hosts all residing within an EC2 Auto Scaling Group.
 
 # Limitations
 
