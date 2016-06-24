@@ -82,7 +82,7 @@ func parseFlags(c *cli.Context) *ArgConfig {
 func main() {
 	app := cli.NewApp()
 	app.Name = "ec2-sg-mangler"
-	app.Version = "0.1.0"
+	app.Version = "0.2.0"
 	app.Usage = "Helper utility to manage the EC2 instance public IPs in an AWS Security Group"
 	app.Action = func(c *cli.Context) error {
 		arg_config := parseFlags(c)
