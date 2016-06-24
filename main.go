@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
@@ -12,6 +13,7 @@ import (
 )
 
 type ArgConfig struct {
+	AwsRegion       string
 	SecurityGroupId string
 	// Port or ICMP Type
 	From int
@@ -24,6 +26,7 @@ type ArgConfig struct {
 
 func parseFlags(c *cli.Context) *ArgConfig {
 	var result ArgConfig
+	result.AwsRegion = c.String("r")
 	re := regexp.MustCompile("^sg-([0-9a-z]{8})$")
 	if re.MatchString(c.String("s")) == false {
 		log.Fatalf("-s must be specified as a Security Group ID. Example: sg-asdf1234\n")
@@ -70,13 +73,20 @@ func main() {
 	app.Usage = "Helper utility to manage the EC2 instance public IPs in an AWS Security Group"
 	app.Action = func(c *cli.Context) {
 		arg_config := parseFlags(c)
-		// TODO: credentials handling? rely on env vars?
-		asg_client := autoscaling.New(session.New())
-		ec2_client := ec2.New(session.New())
+
 		ec2metadata_client := ec2metadata.New(session.New())
+		err := setAwsRegion(ec2metadata_client, arg_config)
+		if err != nil {
+			// TODO: handle error
+		}
+
+		// Reusable config session object for AWS services with current region attached.
+		aws_config_session := session.New(&aws.Config{Region: aws.String(arg_config.AwsRegion)})
+
+		asg_client := autoscaling.New(aws_config_session)
+		ec2_client := ec2.New(aws_config_session)
 
 		var proposed_ips []string
-		var err error
 		if len(arg_config.AutoScalingGroupName) > 0 {
 			proposed_ips, err = getAsgInstancePublicIps(asg_client, ec2_client, arg_config.AutoScalingGroupName)
 			if err != nil {
@@ -116,6 +126,11 @@ func main() {
 		log.Printf("All done.")
 	}
 	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "r",
+			Value: "us-east-1",
+			Usage: "AWS Region",
+		},
 		cli.StringFlag{
 			Name:  "s",
 			Value: "",

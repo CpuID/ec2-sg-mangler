@@ -13,6 +13,21 @@ import (
 	"strings"
 )
 
+func setAwsRegion(ec2metadata_client *ec2metadata.EC2Metadata, arg_config *ArgConfig) error {
+	if len(arg_config.AwsRegion) == 0 {
+		// Discover the region which this instance resides.
+		use_region, err := ec2metadata_client.Region()
+		if err != nil {
+			return errors.New(fmt.Sprintf("Cannot retrieve AWS region from EC2 Metadata Service: %s\n", err.Error()))
+		}
+		arg_config.AwsRegion = use_region
+	}
+	if len(arg_config.AwsRegion) == 0 {
+		return errors.New("We do not have an AWS Region specified (either via -r or the EC2 Metadata Service). Cannot proceed.")
+	}
+	return nil
+}
+
 // Retrieves the list of Public IPs of all EC2 instances attached to the nominated ASG.
 func getAsgInstancePublicIps(asg_client *autoscaling.AutoScaling, ec2_client *ec2.EC2, asg_name string) ([]string, error) {
 	// TODO: handle pagination using NextToken
