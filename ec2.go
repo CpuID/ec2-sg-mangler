@@ -193,19 +193,20 @@ func reconcileIps(sg_ips []string, proposed_ips []string) SgActions {
 }
 
 func doAddSgIps(ec2_client *ec2.EC2, sg_id string, from int, to int, protocol string, sg_ip_adds []string) error {
+	var ip_ranges []*ec2.IpRange
+	for _, v := range sg_ip_adds {
+		ip_range := new(ec2.IpRange)
+		ip_range.CidrIp = aws.String(fmt.Sprintf("%s/32", v))
+		ip_ranges = append(ip_ranges, ip_range)
+	}
 	params := &ec2.AuthorizeSecurityGroupIngressInput{
 		GroupId: aws.String(sg_id),
 		IpPermissions: []*ec2.IpPermission{
 			{
 				FromPort:   aws.Int64(int64(from)),
 				IpProtocol: aws.String(protocol),
-				IpRanges: []*ec2.IpRange{
-					// TODO: build slice of these from sg_ip_adds
-					{
-						CidrIp: aws.String("String"),
-					},
-				},
-				ToPort: aws.Int64(int64(to)),
+				IpRanges:   ip_ranges,
+				ToPort:     aws.Int64(int64(to)),
 			},
 		},
 	}
@@ -219,19 +220,20 @@ func doAddSgIps(ec2_client *ec2.EC2, sg_id string, from int, to int, protocol st
 }
 
 func doRemoveSgIps(ec2_client *ec2.EC2, sg_id string, from int, to int, protocol string, sg_ip_adds []string) error {
+	var ip_ranges []*ec2.IpRange
+	for _, v := range sg_ip_adds {
+		ip_range := new(ec2.IpRange)
+		ip_range.CidrIp = aws.String(fmt.Sprintf("%s/32", v))
+		ip_ranges = append(ip_ranges, ip_range)
+	}
 	params := &ec2.RevokeSecurityGroupIngressInput{
 		GroupId: aws.String(sg_id),
 		IpPermissions: []*ec2.IpPermission{
 			{
 				FromPort:   aws.Int64(int64(from)),
 				IpProtocol: aws.String(protocol),
-				IpRanges: []*ec2.IpRange{
-					// TODO: build slice of these from sg_ip_adds
-					{
-						CidrIp: aws.String("String"),
-					},
-				},
-				ToPort: aws.Int64(int64(to)),
+				IpRanges:   ip_ranges,
+				ToPort:     aws.Int64(int64(to)),
 			},
 		},
 	}
