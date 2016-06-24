@@ -101,6 +101,7 @@ func main() {
 
 		var proposed_ips []string
 		if len(arg_config.AutoScalingGroupName) > 0 {
+			log.Printf("Fetching list of Auto Scaling Group IPs...\n")
 			proposed_ips, err = getAsgInstancePublicIps(asg_client, ec2_client, arg_config.AutoScalingGroupName)
 			if err != nil {
 				log.Fatalf(err.Error())
@@ -108,6 +109,7 @@ func main() {
 		}
 		var this_instance_ip string
 		if arg_config.ThisEc2Instance == true {
+			log.Printf("Fetching the public IP of this EC2 instance...\n")
 			this_instance_ip, err = getThisInstancePublicIp(ec2metadata_client)
 			if err != nil {
 				log.Fatalf(err.Error())
@@ -116,6 +118,7 @@ func main() {
 		}
 		proposed_ips = removeSliceDuplicates(proposed_ips)
 
+		log.Printf("Fetching the IPs currently attached to Security Group...\n")
 		sg_ips, err := getCurrentMatchingSgIps(ec2_client, arg_config.SecurityGroupId, arg_config.From, arg_config.To, arg_config.Protocol)
 		if err != nil {
 			log.Fatalf(err.Error())
