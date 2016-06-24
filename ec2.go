@@ -172,7 +172,7 @@ func getCurrentMatchingSgIps(ec2_client *ec2.EC2, sg_id string, from int, to int
 					}
 					result_ips = append(result_ips, split_ip_range[0])
 				} else {
-					log.Printf("Excluding %s from matched IP list, unexpected from/to/protocol (unrelated rules).\n", *v2.CidrIp)
+					log.Printf("Excluding %s from matched IP list, unexpected from/to/protocol (unrelated rules - %s/%d->%d).\n", *v2.CidrIp, *v1.IpProtocol, *v1.FromPort, *v1.ToPort)
 				}
 			}
 		}

@@ -118,7 +118,7 @@ func main() {
 		}
 		proposed_ips = removeSliceDuplicates(proposed_ips)
 
-		log.Printf("Fetching the IPs currently attached to Security Group...\n")
+		log.Printf("Fetching the IPs currently attached to Security Group (note: source SGs are ignored)...\n")
 		sg_ips, err := getCurrentMatchingSgIps(ec2_client, arg_config.SecurityGroupId, arg_config.From, arg_config.To, arg_config.Protocol)
 		if err != nil {
 			log.Fatalf(err.Error())
