@@ -30,34 +30,46 @@ func parseFlags(c *cli.Context) *ArgConfig {
 	result.AwsRegion = c.String("r")
 	re := regexp.MustCompile("^sg-([0-9a-z]{8})$")
 	if re.MatchString(c.String("s")) == false {
-		log.Fatalf("-s must be specified as a Security Group ID. Example: sg-asdf1234\n")
+		log.Printf("Error: -s must be specified as a Security Group ID. Example: sg-asdf1234\n\n")
+		cli.ShowAppHelp(c)
+		os.Exit(1)
 	} else {
 		result.SecurityGroupId = c.String("s")
 	}
 	if c.String("p") != "tcp" && c.String("p") != "udp" && c.String("p") != "icmp" {
-		log.Fatalf("-p must be one of 'tcp', 'udp', or 'icmp'.\n")
+		log.Printf("Error: -p must be one of 'tcp', 'udp', or 'icmp'.\n\n")
+		cli.ShowAppHelp(c)
+		os.Exit(1)
 	} else {
 		result.Protocol = c.String("p")
 	}
 	if result.Protocol == "tcp" || result.Protocol == "udp" {
 		if c.Int("f") < 1 || c.Int("f") > 65535 {
-			log.Fatalf("-f must be a port number between 1 and 65535.\n")
+			log.Printf("Error: -f must be a port number between 1 and 65535.\n\n")
+			cli.ShowAppHelp(c)
+			os.Exit(1)
 		} else {
 			result.From = c.Int("f")
 		}
 		if c.Int("t") < 1 || c.Int("t") > 65535 {
-			log.Fatalf("-t must be a port number between 1 and 65535.\n")
+			log.Printf("Error: -t must be a port number between 1 and 65535.\n\n")
+			cli.ShowAppHelp(c)
+			os.Exit(1)
 		} else {
 			result.To = c.Int("t")
 		}
 	} else {
 		if c.Int("f") < 0 || c.Int("f") > 255 {
-			log.Fatalf("-f must be an ICMP type between 0 and 255. See http://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml\n")
+			log.Printf("Error: -f must be an ICMP type between 0 and 255. See http://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml\n\n")
+			cli.ShowAppHelp(c)
+			os.Exit(1)
 		} else {
 			result.From = c.Int("f")
 		}
 		if c.Int("t") < 0 || c.Int("t") > 255 {
-			log.Fatalf("-t must be an ICMP type between 0 and 255. See http://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml\n")
+			log.Printf("Error: -t must be an ICMP type between 0 and 255. See http://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml\n\n")
+			cli.ShowAppHelp(c)
+			os.Exit(1)
 		} else {
 			result.To = c.Int("t")
 		}
@@ -130,7 +142,7 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "r",
-			Value: "us-east-1",
+			Value: "",
 			Usage: "AWS Region",
 		},
 		cli.StringFlag{

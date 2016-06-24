@@ -42,10 +42,29 @@ A basic example is available below:
 
 # Configuration
 
-Configuration is performed via CLI arguments, and self documenting using `--help`, for example:
+Configuration is performed via CLI arguments, and self documenting using `--help`:
 
 ```
+NAME:
+   ec2-sg-mangler - Helper utility to manage the EC2 instance public IPs in an AWS Security Group
 
+USAGE:
+   ec2-sg-mangler [global options] command [command options] [arguments...]
+
+VERSION:
+   0.1.0
+
+COMMANDS:
+GLOBAL OPTIONS:
+   -r value   AWS Region
+   -s value   Security Group ID (must exist already)
+   -f value   From Port Number OR ICMP Type (-1 for all ICMP types) (default: 1)
+   -t value   To Port Number OR ICMP Type (-1 for all ICMP types ) (default: 1)
+   -p value   IP Protocol Name (may be one of 'tcp', 'udp', or 'icmp' currently) (default: "tcp")
+   -i     Add this EC2 instance public IP? Not required if this instance is part of the nominated ASG
+   -a value   Add the public IPs for all EC2 instances in this ASG Name
+   --help, -h   show help
+   --version, -v  print the version
 ```
 
 # Building
