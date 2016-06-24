@@ -84,7 +84,7 @@ func main() {
 	app.Name = "ec2-sg-mangler"
 	app.Version = "0.1.0"
 	app.Usage = "Helper utility to manage the EC2 instance public IPs in an AWS Security Group"
-	app.Action = func(c *cli.Context) {
+	app.Action = func(c *cli.Context) error {
 		arg_config := parseFlags(c)
 
 		ec2metadata_client := ec2metadata.New(session.New())
@@ -141,6 +141,7 @@ func main() {
 			log.Printf("Removed Ingress IPs %s to SG %s.\n", strings.Join(sg_actions.Remove, ", "), arg_config.SecurityGroupId)
 		}
 		log.Printf("All done.")
+		return nil
 	}
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
