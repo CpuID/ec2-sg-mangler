@@ -2,6 +2,8 @@
 
 *Helper utility to manage the EC2 instance public IPs in an AWS Security Group*
 
+[![Build Status](https://travis-ci.org/CpuID/ec2-sg-mangler.svg?branch=master)](https://travis-ci.org/CpuID/ec2-sg-mangler)
+
 # Summary
 
 If you have some infrastructure built within a VPC, and some legacy infrastructure outside a VPC ([EC2-Classic](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-vpc.html#differences-ec2-classic-vpc)),
