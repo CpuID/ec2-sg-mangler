@@ -172,15 +172,19 @@ type SgActions struct {
 
 // Reconcile the IP list between the SG, and what is proposed to be in use.
 func reconcileIps(sg_ips []string, proposed_ips []string) SgActions {
+	// Ensure no duplicates.
+	sg_ips = removeSliceDuplicates(sg_ips)
+	proposed_ips = removeSliceDuplicates(proposed_ips)
+
 	var result SgActions
 	for _, v1 := range sg_ips {
-		if stringInSlice(v1, proposed_ips) == true {
-
+		if stringInSlice(v1, proposed_ips) == false {
+			result.Remove = append(result.Remove, v1)
 		}
 	}
 	for _, v2 := range proposed_ips {
-		if stringInSlice(v2, sg_ips) == true {
-
+		if stringInSlice(v2, sg_ips) == false {
+			result.Add = append(result.Add, v2)
 		}
 	}
 	sort.Strings(result.Add)
