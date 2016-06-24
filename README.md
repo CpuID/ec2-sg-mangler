@@ -35,9 +35,10 @@ in an ASG, will be an issue.
 A future addition would be to provide a list of SG IDs, and spread the IP address list between them to overcome the AWS restriction of
 50 inbound + 50 outbound (100 total) rules on VPC based SGs, and 100 rules total for EC2-Classic based SGs.
 
-Also, make sure you nominate independent SGs for use with this utility from all other rules, as rules will be added and removed automatically.
+Also, make sure you plan carefully which SG to use with this utility, as rules will be added and removed automatically. EC2-Classic
+does not permit adding extra SGs to a running instance, they can only be [attached at launch](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html#ec2-classic-security-groups).
 **Any IPs that are no longer part of the nominated list (EC2 instance or ASG instances) with a matching from/to port and protocol
-will be removed from the SG.**
+will be removed from the SG. Rules with different from/to port/s and protocol will be ignored.**
 
 # IAM Policy
 
