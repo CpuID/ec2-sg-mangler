@@ -25,12 +25,12 @@ type ArgConfig struct {
 func parseFlags(c *cli.Context) *ArgConfig {
 	var result ArgConfig
 	re := regexp.MustCompile("^sg-([0-9a-z]{8})$")
-	if re.MatchString(c.String("sg")) == false {
+	if re.MatchString(c.String("s")) == false {
 		log.Fatalf("-s must be specified as a Security Group ID. Example: sg-asdf1234\n")
 	} else {
 		result.SecurityGroupId = c.String("s")
 	}
-	if c.String("p") != "tcp" || c.String("p") != "udp" || c.String("p") != "icmp" {
+	if c.String("p") != "tcp" && c.String("p") != "udp" && c.String("p") != "icmp" {
 		log.Fatalf("-p must be one of 'tcp', 'udp', or 'icmp'.\n")
 	} else {
 		result.Protocol = c.String("p")
