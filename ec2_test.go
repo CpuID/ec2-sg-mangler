@@ -30,6 +30,8 @@ func TestReconcileIps(t *testing.T) {
 			"172.31.2.1",
 		},
 	}
+	// NOTE: these sorts are not numeric, we would need a custom sorter to do octet level IP address sorts.
+	// as long as we are consistent, a non-issue currently.
 	sort.Strings(test_sg_ips)
 	sort.Strings(test_proposed_ips)
 	result := reconcileIps(test_sg_ips, test_proposed_ips)

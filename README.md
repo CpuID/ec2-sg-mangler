@@ -43,10 +43,52 @@ will be removed from the SG.**
 
 For this utility to operate, it needs an IAM policy attached to the credentials in use, to modify the Security Group.
 
+Some notes:
+* [DescribeAutoScalingGroups](http://docs.aws.amazon.com/AutoScaling/latest/APIReference/API_DescribeAutoScalingGroups.html) API operations do not support
+resource-level permissions, so you need `*` and cannot use a specific ASG ARN.
+* [DescribeSecurityGroups](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html) API operations do not support
+resource-level permissions, so you need `*` and cannot use a specific ASG ARN.
+
 A basic example is available below:
 
 ```
-
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "Stmt1466742712000",
+            "Effect": "Allow",
+            "Action": [
+                "autoscaling:DescribeAutoScalingGroups"
+            ],
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Sid": "Stmt1466742785000",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeInstances",
+                "ec2:DescribeSecurityGroups"
+            ],
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Sid": "Stmt1466742815000",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:RevokeSecurityGroupIngress"
+            ],
+            "Resource": [
+                "arn:aws:ec2:us-east-1:XXXXXXXXXXXX:security-group/sg-asdf1234"
+            ]
+        }
+    ]
+}
 ```
 
 # Configuration
@@ -76,8 +118,19 @@ GLOBAL OPTIONS:
    --version, -v  print the version
 ```
 
+# Use within Alpine Linux Docker image
+
+If you are using a lightweight Docker image such as [Alpine Linux](https://hub.docker.com/_/alpine/) as your base,
+there are a few prerequisites for your Dockerfile:
+
+* Symlink MUSL libc like so: `mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2`
+  * Without it you will get an error like `sh: /ec2-sg-mangler: not found`
+* Install the [ca-certificates](http://pkgs.alpinelinux.org/packages?name=ca-certificates&branch=&repo=&arch=&maintainer=) package using `apk`
+  * Without it you will get an error like `caused by: Post https://autoscaling.us-east-1.amazonaws.com/: x509: failed to load system roots and no roots provided`
+
 # Building
 
-`go get -d && go build` should produce a single executable.
+`go get -d && go build` should produce a single executable. Binary releases are also available [here](https://github.com/CpuID/ec2-sg-mangler/releases)
+if you prefer.
 
 

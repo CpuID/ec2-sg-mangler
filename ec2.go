@@ -202,6 +202,8 @@ func reconcileIps(sg_ips []string, proposed_ips []string) SgActions {
 			result.Add = append(result.Add, v2)
 		}
 	}
+	// NOTE: these sorts are not numeric, we would need a custom sorter to do octet level IP address sorts.
+	// as long as we are consistent, a non-issue currently.
 	sort.Strings(result.Add)
 	sort.Strings(result.Remove)
 	return result
