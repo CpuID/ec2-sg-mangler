@@ -16,10 +16,10 @@ func TestRemoveSliceDuplicates(t *testing.T) {
 func TestStringInSlice(t *testing.T) {
 	result1 := stringInSlice("abc", []string{"abc", "def", "ghi"})
 	if result1 != true {
-		t.Errorf("Invalid result for stringInSlice(), expected true, got %b", result1)
+		t.Errorf("Invalid result for stringInSlice(), expected true, got %t", result1)
 	}
 	result2 := stringInSlice("zzz", []string{"abc", "def", "ghi"})
 	if result2 != false {
-		t.Errorf("Invalid result for stringInSlice(), expected false, got %b", result2)
+		t.Errorf("Invalid result for stringInSlice(), expected false, got %t", result2)
 	}
 }
