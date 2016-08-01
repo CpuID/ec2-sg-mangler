@@ -2,7 +2,7 @@
 
 *Helper utility to manage the EC2 instance public IPs in an AWS Security Group*
 
-[![Build Status](https://travis-ci.org/CpuID/ec2-sg-mangler.svg?branch=master)](https://travis-ci.org/CpuID/ec2-sg-mangler)
+[![Build Status](https://travis-ci.org/CpuID/ec2-sg-mangler.svg?branch=master)](https://travis-ci.org/CpuID/ec2-sg-mangler) [![Coverage Status](https://coveralls.io/repos/github/CpuID/ec2-sg-mangler/badge.svg?branch=master)](https://coveralls.io/github/CpuID/ec2-sg-mangler?branch=master)
 
 # Summary
 
